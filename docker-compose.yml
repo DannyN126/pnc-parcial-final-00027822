@@ -1,0 +1,38 @@
+services:
+  database:
+    image: postgres:16-alpine
+    container_name: restaurant-db
+    environment:
+      POSTGRES_DB: restaurant_orders_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5433:5432"
+    volumes:
+      - restaurant_postgres_data:/var/lib/postgresql/data
+    networks:
+      - restaurant-network
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: restaurant-api
+    depends_on:
+      - database
+    environment:
+      DATABASE_URL: jdbc:postgresql://database:5432/restaurant_orders_db
+      DATABASE_USERNAME: postgres
+      DATABASE_PASSWORD: postgres
+      JWT_SECRET: VGhpcy1pcy1hLXZlcnktc2VjdXJlLWp3dC1zZWNyZXQtZm9yLXJlc3RhdXJhbnQtYXBpLTIwMjY=
+    ports:
+      - "8080:8080"
+    networks:
+      - restaurant-network
+
+volumes:
+  restaurant_postgres_data:
+
+networks:
+  restaurant-network:
+    driver: bridge
